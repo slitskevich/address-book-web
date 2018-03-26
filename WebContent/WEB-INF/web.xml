@@ -8,5 +8,10 @@
     <welcome-file>default.html</welcome-file>
     <welcome-file>default.htm</welcome-file>
     <welcome-file>default.jsp</welcome-file>
+    <welcome-file>contactsList.jsp</welcome-file>
   </welcome-file-list>
+  <context-param>
+  	<param-name>apiUrl</param-name>
+    <param-value>http://localhost:8080/addressbook/api/</param-value>
+  </context-param>
 </web-app>
