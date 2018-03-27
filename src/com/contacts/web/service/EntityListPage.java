@@ -34,8 +34,12 @@ public class EntityListPage <T> {
 		TypeFactory typeFactory = objectMapper.getTypeFactory();
 		
 		for (String next : linksHeader.split(",")) {
-			Link link = Link.valueOf(next);
-			links.put(link.getRel(), PageLink.parse(link.getUri()));
+			try {
+				Link link = Link.valueOf(next);
+				links.put(link.getRel(), PageLink.parse(link.getUri()));
+			} catch (IllegalArgumentException ex) {
+				LOGGER.info("Failed to parse links: " + next);
+			}
 		}	
 		
 		this.pageItems = objectMapper.readValue(pageContent, typeFactory.constructCollectionType(List.class, clazz));
