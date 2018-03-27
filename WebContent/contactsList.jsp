@@ -21,7 +21,7 @@
 			
 			%><header><h1>Contacts</h1></header><ol><%
 			for (Contact next : contacts.getPageItems()) {
-	%><li><a href="contact?contactId=<%= next.getId() %>"><%= next.getLastName() %>, <%= next.getFirstName() %></a></li><%
+	%><li><a href="contact.jsp?contactId=<%= next.getId() %>"><%= next.getLastName() %>, <%= next.getFirstName() %></a></li><%
 			}%>
 			</ol><br/>
 			<%
