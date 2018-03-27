@@ -3,21 +3,25 @@ package com.contacts.web.service;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.List;
+import java.io.UnsupportedEncodingException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.logging.Logger;
 
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.impl.client.HttpClientBuilder;
 
 import com.contacts.web.model.Contact;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 
 public class ContactService {
 	
-	private static final String ALL_CONTACTS_PATH = "contacts";
+	private static final Logger LOGGER = Logger.getLogger(ContactService.class.getName());
+
+	private static final String CONTACTS_PATH = "contacts";
 	
 	private String apiUrl;
 	
@@ -25,12 +29,15 @@ public class ContactService {
 		this.apiUrl = apiUrl;
 	}
 	
-	private String requestEntity(String path) throws ClientProtocolException, IOException {
+	private HttpResponse requestEntity(URI uri) throws ClientProtocolException, IOException {
+		LOGGER.info("sending request to " + uri.toString());
 		final HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpGet httpGetRequest = new HttpGet(apiUrl + "contacts");
-		HttpResponse httpResponse = httpClient.execute(httpGetRequest);
-		
-		BufferedReader reader = new BufferedReader(new InputStreamReader(httpResponse.getEntity().getContent(), "UTF-8"));
+		HttpGet httpGetRequest = new HttpGet(uri);
+		return httpClient.execute(httpGetRequest);
+	}
+	
+	private String readResponseEntity(HttpResponse response) throws UnsupportedEncodingException, UnsupportedOperationException, IOException {
+		BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
 		StringBuilder builder = new StringBuilder();
 		for (String line = null; (line = reader.readLine()) != null;) {
 		    builder.append(line).append("\n");
@@ -38,18 +45,19 @@ public class ContactService {
 		return builder.toString();
 	}
 	
-	private <T> List<T> loadList(String path, Class<T> clazz) throws ClientProtocolException, IOException {
-		String response = requestEntity(path);
-
-		ObjectMapper objectMapper = new ObjectMapper();
-		TypeFactory typeFactory = objectMapper.getTypeFactory();
-		return objectMapper.readValue(response, typeFactory.constructCollectionType(List.class, clazz));
+	private <T> EntityListPage<T> loadList(String path, Class<T> clazz, int offset, int limit) throws ClientProtocolException, IOException, URISyntaxException {
+		URI uri = (new URIBuilder(apiUrl + path)).
+									 setParameter("offset", Integer.toString(offset)).
+									 setParameter("limit", Integer.toString(limit)).
+									 build();
+		HttpResponse response = requestEntity(uri);
+		String content = readResponseEntity(response);
+		String links = response.getHeaders("Links")[0].getValue();
+		return new EntityListPage<T>(content, links, clazz);
 	}
 	
-	public List<Contact> loadAllContacts() throws ClientProtocolException, IOException {
-		List<Contact> contacts = loadList(ALL_CONTACTS_PATH, Contact.class);
-		
-		return contacts;
+	public EntityListPage<Contact> loadContacts(int offset, int limit) throws ClientProtocolException, IOException, URISyntaxException {
+		return loadList(CONTACTS_PATH, Contact.class, offset, limit);
 	}
 
 }

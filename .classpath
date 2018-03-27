@@ -15,5 +15,6 @@
 	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/HttpClient"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Jackson-Parser-API"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/JAX-RS-Jersey-API"/>
 	<classpathentry kind="output" path="build/classes"/>
 </classpath>
