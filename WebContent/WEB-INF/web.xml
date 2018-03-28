@@ -14,4 +14,7 @@
     <param-name>apiUrl</param-name>
     <param-value>http://localhost:8080/addressbook/api/</param-value>
   </context-param>
+  <error-page>
+    <location>/error.jsp</location>
+  </error-page>
 </web-app>

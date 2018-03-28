@@ -52,7 +52,4 @@ public class Contact {
 	public void setAddress(String address) {
 		this.address = address;
 	}
-
-
-
 }

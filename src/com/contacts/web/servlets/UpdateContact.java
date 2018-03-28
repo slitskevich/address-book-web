@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.contacts.web.Constants;
 import com.contacts.web.model.Contact;
 import com.contacts.web.service.ApiException;
 import com.contacts.web.service.ContactService;
@@ -18,31 +19,23 @@ import com.contacts.web.service.ContactService;
 public class UpdateContact extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public UpdateContact() {
-        super();
-        // TODO Auto-generated constructor stub
-    }
-
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String contactId = request.getParameter("contact_id");
+		String contactId = request.getParameter(Constants.CONTACT_ID_PARAMETER);
 		Contact update = new Contact(Integer.parseInt(contactId), 
-									 request.getParameter("first_name"), 
-									 request.getParameter("last_name"), 
-									 request.getParameter("email"));
+									 request.getParameter(Constants.FIRST_NAME_PARAMETER), 
+									 request.getParameter(Constants.LAST_NAME_PARAMETER), 
+									 request.getParameter(Constants.EMAIL_PARAMETER));
 	    
-	    ContactService service = new ContactService(getServletContext().getInitParameter("apiUrl"));
+	    ContactService service = new ContactService(getServletContext().getInitParameter(Constants.API_URL_PARAMETER));
 	    try {
 		    service.updateContact(update);
 		    response.sendRedirect(request.getContextPath());
 	    } catch (ApiException apiEx) {
-	    	request.setAttribute("errorMessage", apiEx.getMessage());
-	    	request.getRequestDispatcher(request.getParameter("reload_path")).forward(request, response);
+	    	request.setAttribute(Constants.ERROR_MESSAGE_PARAMETER, apiEx.getMessage());
+	    	request.getRequestDispatcher(request.getParameter(Constants.RELOAD_PATH_PARAMETER)).forward(request, response);
 	    } catch (Exception ex) {
 	    	ex.printStackTrace();
 	    	throw new ServletException(ex);

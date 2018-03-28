@@ -3,6 +3,8 @@ package com.contacts.web.service;
 import java.net.URI;
 import java.util.logging.Logger;
 
+import com.contacts.web.Constants;
+
 public class PageLink {
 	
 	private static final Logger LOGGER = Logger.getLogger(PageLink.class.getName());
@@ -27,9 +29,9 @@ public class PageLink {
 		for (String next : uri.getQuery().split("&")) {
 			String[] comps = next.split("=");
 			int value = Integer.parseInt(comps[1]);
-			if (comps[0].equalsIgnoreCase("offset")) {
+			if (comps[0].equalsIgnoreCase(Constants.OFFSET_PARAMETER)) {
 				offset = value;
-			} else if (comps[0].equalsIgnoreCase("limit")) {
+			} else if (comps[0].equalsIgnoreCase(Constants.LIMTI_PARAMETER)) {
 				limit = value;
 			}
 		}

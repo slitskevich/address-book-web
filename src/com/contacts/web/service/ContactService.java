@@ -5,10 +5,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.logging.Logger;
 
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
@@ -27,65 +25,66 @@ import com.contacts.web.model.Contact;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ContactService {
-	
+
 	private static final Logger LOGGER = Logger.getLogger(ContactService.class.getName());
 
 	private static final String CONTACTS_PATH = "contacts";
-	
+
 	private static final String ENTITY_REQUEST_URL = "%s%s/%s";
-	
+
 	private static final String ENTITY_CREATE_URL = "%s%s";
-	
+
 	private String apiUrl;
-	
+
 	public ContactService(String apiUrl) {
 		this.apiUrl = apiUrl;
 	}
-	
+
 	private HttpResponse requestEntity(URI uri) throws ClientProtocolException, IOException {
 		LOGGER.info("sending request to " + uri.toString());
 		final HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpGet httpGetRequest = new HttpGet(uri);
 		return httpClient.execute(httpGetRequest);
 	}
-	
-	private String readResponseEntity(HttpResponse response) throws UnsupportedEncodingException, UnsupportedOperationException, IOException {
+
+	private String readResponseEntity(HttpResponse response)
+			throws UnsupportedEncodingException, UnsupportedOperationException, IOException {
 		BufferedReader reader = new BufferedReader(new InputStreamReader(response.getEntity().getContent(), "UTF-8"));
 		StringBuilder builder = new StringBuilder();
 		for (String line = null; (line = reader.readLine()) != null;) {
-		    builder.append(line).append("\n");
+			builder.append(line).append("\n");
 		}
 		return builder.toString();
 	}
-	
-	private <T> EntityListPage<T> loadList(String path, Class<T> clazz, int offset, int limit) throws ClientProtocolException, IOException, URISyntaxException {
-		URI uri = (new URIBuilder(apiUrl + path)).
-									 setParameter("offset", Integer.toString(offset)).
-									 setParameter("limit", Integer.toString(limit)).
-									 build();
+
+	public EntityListPage<Contact> loadContacts(int offset, int limit) throws Exception {
+		URI uri = (new URIBuilder(apiUrl + CONTACTS_PATH)).setParameter("offset", Integer.toString(offset))
+				.setParameter("limit", Integer.toString(limit)).build();
 		HttpResponse response = requestEntity(uri);
+		int statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode != 200) {
+			ApiStatus status = getResponseStatus(response);
+			throw new ApiException(status.getMessage());
+		}
 		String content = readResponseEntity(response);
 		String links = response.getHeaders("Links")[0].getValue();
-		return new EntityListPage<T>(content, links, clazz);
+		return new EntityListPage<Contact>(content, links, Contact.class);
 	}
-	
-	private <T> T loadEntity(URI uri, Class<T> clazz) throws ClientProtocolException, IOException {
-		HttpResponse response = requestEntity(uri);
-		String content = readResponseEntity(response);
-		ObjectMapper objectMapper = new ObjectMapper();
-		return objectMapper.readValue(content, clazz);
-	}
-	
-	public EntityListPage<Contact> loadContacts(int offset, int limit) throws Exception {
-		return loadList(CONTACTS_PATH, Contact.class, offset, limit);
-	}
-	
+
 	public Contact loadContactById(int contactId) throws Exception {
 		String address = String.format(ENTITY_REQUEST_URL, apiUrl, CONTACTS_PATH, Integer.toString(contactId));
 		URI uri = (new URIBuilder(address)).build();
-		return loadEntity(uri, Contact.class);
+		HttpResponse response = requestEntity(uri);
+		int statusCode = response.getStatusLine().getStatusCode();
+		if (statusCode != 200) {
+			ApiStatus status = getResponseStatus(response);
+			throw new ApiException(status.getMessage());
+		}
+		String content = readResponseEntity(response);
+		ObjectMapper objectMapper = new ObjectMapper();
+		return objectMapper.readValue(content, Contact.class);
 	}
-	
+
 	public void updateContact(Contact contact) throws Exception {
 		String address = String.format(ENTITY_REQUEST_URL, apiUrl, CONTACTS_PATH, Integer.toString(contact.getId()));
 		URI uri = (new URIBuilder(address)).build();
@@ -107,18 +106,19 @@ public class ContactService {
 			throw new ApiException(status.getMessage());
 		}
 	}
-	
+
 	public void deleteContact(int contactId) throws Exception {
 		String address = String.format(ENTITY_REQUEST_URL, apiUrl, CONTACTS_PATH, Integer.toString(contactId));
 		URI uri = (new URIBuilder(address)).build();
 		final HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpResponse response = httpClient.execute(new HttpDelete(uri));
-		int statusCode = response.getStatusLine().getStatusCode(); 
+		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode != 204) {
-			throw new Exception("Failed to delete contact: " + statusCode);
+			ApiStatus status = getResponseStatus(response);
+			throw new ApiException(status.getMessage());
 		}
 	}
-	
+
 	private HttpResponse sendContact(Contact contact, HttpEntityEnclosingRequestBase method) throws Exception {
 		final HttpClient httpClient = HttpClientBuilder.create().build();
 		ObjectMapper objectMapper = new ObjectMapper();
@@ -128,9 +128,9 @@ public class ContactService {
 		method.setHeader("Accept", "application/json");
 		method.setHeader("Content-type", "application/json");
 		method.setEntity(entity);
-		return httpClient.execute(method); 
+		return httpClient.execute(method);
 	}
-	
+
 	private ApiStatus getResponseStatus(HttpResponse response) throws Exception {
 		String content = readResponseEntity(response);
 		ObjectMapper objectMapper = new ObjectMapper();
