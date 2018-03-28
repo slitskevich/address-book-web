@@ -11,21 +11,42 @@
 <body>
 	<a href="<%=request.getContextPath()%>">Full contact list</a>
 	<header><h1>Contact details</h1></header><ol>
-	<%
+	<% 	String errorMessage = (String)request.getAttribute("errorMessage");
+		if (errorMessage != null) { %>
+		<p style="color:red;">Error: <%= errorMessage %></p><%
+		}
 		try {
 			ContactService service = new ContactService(getServletContext().getInitParameter("apiUrl"));
-			int contactId = Integer.parseInt(request.getParameter("contactId"));
-			Contact contact = service.loadContactById(contactId);
-			%>
-			<form action="${pageContext.request.contextPath}/UpdateContact" method="post">
-				<input name="contact_id" type="hidden" value="<%= contact.getId() %>" />
-				<br/>First name: <input name="first_name" type="text" id="first_name_input" value="<%= contact.getFirstName() %>" />
-				<br/>Last name: <input name="last_name" type="text" id="last_name_input" value="<%= contact.getLastName() %>" />
-				<br/>E-mail: <input name="email" type="text" id="email_input" value="<%= contact.getEmail() %>" />
-				<p>Submit button.
-    			<input type="submit" name="submit" value="submit" /></p>
+			String idParameter = request.getParameter("contactId");
+			String firstName = "";
+			String lastName = "";
+			String email = "";
+			String action = "/CreateContact";
+			int contactId = -1;
+			if (idParameter != null) {
+				contactId = Integer.parseInt(idParameter);
+				Contact contact = service.loadContactById(contactId);
+				firstName = contact.getFirstName();
+				lastName = contact.getLastName();
+				email = contact.getAddress();
+				action = "/UpdateContact";
+			}
+				%>
+			<form action="${pageContext.request.contextPath}/<%= action %>" method="post">
+				<input name="contact_id" type="hidden" value="<%= contactId %>" />
+				<input name="reload_path" type="hidden" value="<%= request.getServletPath() %>?<%= request.getQueryString() %>" />
+				<br/>First name: <input name="first_name" type="text" id="first_name_input" value="<%= firstName %>" />
+				<br/>Last name: <input name="last_name" type="text" id="last_name_input" value="<%= lastName %>" />
+				<br/>E-mail: <input name="email" type="text" id="email_input" value="<%= email %>" />
+    			<br/><input type="submit" name="submit" value="submit" />
 			</form>
-	<%	} catch (Exception ex) {
+			<% if (contactId > -1) { %>
+				<form action="${pageContext.request.contextPath}/DeleteContact" method="post">
+					<input type="hidden" name="contact_id" value="<%= contactId %>"/>
+					<input type="submit" name="submit" value="delete" />
+				</form>
+			<% }
+		} catch (Exception ex) {
 			%><%= "Failed to load contact details: " + ex %><%
 		}
 	%>

@@ -10,7 +10,10 @@
 <title><%= "Contacts" %></title>
 </head>
 <body>
-	<%
+	<% 	String errorMessage = request.getParameter("errorMessage");
+		if (errorMessage != null) { %>
+		Error: <%= errorMessage %><%
+		}
 		try {
 			ContactService service = new ContactService(getServletContext().getInitParameter("apiUrl"));
 			String offsetParameter = request.getParameter("offset");
@@ -19,7 +22,7 @@
 			int limit = limitParameter != null ? Integer.parseInt(limitParameter) : 5;
 			EntityListPage<Contact> contacts = service.loadContacts(offset, limit);			
 			
-			%><header><h1>Contacts</h1></header><ol><%
+			%><header><h1>Contacts</h1></header>   <a href="contact.jsp">Add new Contact</a></a><ol><%
 			for (Contact next : contacts.getPageItems()) {
 	%><li><a href="contact.jsp?contactId=<%= next.getId() %>"><%= next.getLastName() %>, <%= next.getFirstName() %></a></li><%
 			}%>

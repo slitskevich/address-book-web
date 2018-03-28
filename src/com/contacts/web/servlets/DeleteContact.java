@@ -7,21 +7,19 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.contacts.web.model.Contact;
-import com.contacts.web.service.ApiException;
 import com.contacts.web.service.ContactService;
 
 /**
- * Servlet implementation class UpdateContact
+ * Servlet implementation class DeleteContact
  */
-@WebServlet("/UpdateContact")
-public class UpdateContact extends HttpServlet {
+@WebServlet("/DeleteContact")
+public class DeleteContact extends HttpServlet {
 	private static final long serialVersionUID = 1L;
        
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public UpdateContact() {
+    public DeleteContact() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -30,23 +28,14 @@ public class UpdateContact extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String contactId = request.getParameter("contact_id");
-		Contact update = new Contact(Integer.parseInt(contactId), 
-									 request.getParameter("first_name"), 
-									 request.getParameter("last_name"), 
-									 request.getParameter("email"));
-	    
+		int contactId = Integer.parseInt(request.getParameter("contact_id"));
 	    ContactService service = new ContactService(getServletContext().getInitParameter("apiUrl"));
 	    try {
-		    service.updateContact(update);
-		    response.sendRedirect(request.getContextPath());
-	    } catch (ApiException apiEx) {
-	    	request.setAttribute("errorMessage", apiEx.getMessage());
-	    	request.getRequestDispatcher(request.getParameter("reload_path")).forward(request, response);
+		    service.deleteContact(contactId);
 	    } catch (Exception ex) {
-	    	ex.printStackTrace();
 	    	throw new ServletException(ex);
 	    }
+	    response.sendRedirect(request.getContextPath());		
 	}
 
 }

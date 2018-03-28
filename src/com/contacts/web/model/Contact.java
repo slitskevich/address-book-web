@@ -6,27 +6,19 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 public class Contact {
 	
 	private int id;
-	private String email;
 	private String firstName;
 	private String lastName;
+	private String address;
 	
 	public Contact() {
 		
 	}
 	
-	public Contact(int id, String firstName, String lastName, String email) {
+	public Contact(int id, String firstName, String lastName, String address) {
 		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;
-		this.email = email;
-	}
-
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
+		this.address = address;
 	}
 
 	public String getFirstName() {
@@ -52,5 +44,15 @@ public class Contact {
 	public void setId(int id) {
 		this.id = id;
 	}
+	
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+
 
 }
