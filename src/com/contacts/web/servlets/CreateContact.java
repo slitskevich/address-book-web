@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.contacts.web.Constants;
-import com.contacts.web.model.Contact;
+import com.contacts.web.model.ContactModel;
 import com.contacts.web.service.ApiException;
 import com.contacts.web.service.ContactService;
 
@@ -25,7 +25,7 @@ public class CreateContact extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
-		Contact create = new Contact();
+		ContactModel create = new ContactModel();
 		create.setAddress(request.getParameter(Constants.EMAIL_PARAMETER));
 		create.setFirstName(request.getParameter(Constants.FIRST_NAME_PARAMETER));
 		create.setLastName(request.getParameter(Constants.LAST_NAME_PARAMETER));

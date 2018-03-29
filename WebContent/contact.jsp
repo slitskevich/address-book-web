@@ -1,16 +1,13 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-<%@page import="com.contacts.web.model.Contact"  %>
+<%@page import="com.contacts.web.model.ContactModel"  %>
 <%@page import="com.contacts.web.service.*"  %>
 <%@page import="com.contacts.web.Constants"  %>
 <%@ page errorPage="error.jsp" %> 
-<%!
-private String attributeString(HttpServletRequest request, String name, String defaultValue) {
+<%!private String attributeString(HttpServletRequest request, String name, String defaultValue) {
 	String requestValue = (String)request.getAttribute(name);
 	return requestValue != null ? requestValue : defaultValue;
-}
-
-%>
+}%>
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
 <html>
 <head>
@@ -20,31 +17,31 @@ private String attributeString(HttpServletRequest request, String name, String d
 <body>
 	<a href="<%=request.getContextPath()%>">Full contact list</a>
 	<header><h1>Contact details</h1></header><ol>
-	<% 	
+	<%
 		String query = request.getQueryString();
-		String reloadPath = request.getServletPath() + (query != null ? "?" + query : "");
-		String errorMessage = (String)request.getAttribute(Constants.ERROR_MESSAGE_PARAMETER);
-		String firstName = attributeString(request, Constants.FIRST_NAME_PARAMETER, "");
-		String lastName = attributeString(request, Constants.LAST_NAME_PARAMETER, "");
-		String email = attributeString(request, Constants.EMAIL_PARAMETER, "");
-		if (errorMessage != null) { 
-		%>
-		<p style="color:red;">Error: <%= errorMessage %></p><%
-		}
-		try {
+			String reloadPath = request.getServletPath() + (query != null ? "?" + query : "");
+			String errorMessage = (String)request.getAttribute(Constants.ERROR_MESSAGE_PARAMETER);
+			String firstName = attributeString(request, Constants.FIRST_NAME_PARAMETER, "");
+			String lastName = attributeString(request, Constants.LAST_NAME_PARAMETER, "");
+			String email = attributeString(request, Constants.EMAIL_PARAMETER, "");
+			if (errorMessage != null) {
+	%>
+		<p style="color:red;">Error: <%=errorMessage%></p><%
+			}
+				try {
 			ContactService service = new ContactService(getServletContext().getInitParameter(Constants.API_URL_PARAMETER));
 			String idParameter = request.getParameter("contactId");
 			String action = "/CreateContact";
 			int contactId = -1;
 			if (idParameter != null) {
 				contactId = Integer.parseInt(idParameter);
-				Contact contact = service.loadContactById(contactId);
+				ContactModel contact = service.loadContactById(contactId);
 				firstName = contact.getFirstName();
 				lastName = contact.getLastName();
 				email = contact.getAddress();
 				action = "/UpdateContact";
 			}
-				%>
+		%>
 			<form action="${pageContext.request.contextPath}/<%= action %>" method="post">
 				<input name="<%= Constants.CONTACT_ID_PARAMETER %>" type="hidden" value="<%= contactId %>" />
 				<input name="<%= Constants.RELOAD_PATH_PARAMETER %>" type="hidden" value="<%= reloadPath %>" />

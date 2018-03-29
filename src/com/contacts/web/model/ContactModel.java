@@ -3,18 +3,18 @@ package com.contacts.web.model;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class Contact {
+public class ContactModel {
 	
 	private int id;
 	private String firstName;
 	private String lastName;
 	private String address;
 	
-	public Contact() {
+	public ContactModel() {
 		
 	}
 	
-	public Contact(int id, String firstName, String lastName, String address) {
+	public ContactModel(int id, String firstName, String lastName, String address) {
 		this.id = id;
 		this.firstName = firstName;
 		this.lastName = lastName;

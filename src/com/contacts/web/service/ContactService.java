@@ -7,10 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.logging.Logger;
 
-import javax.ws.rs.core.Response.Status;
-
 import org.apache.http.HttpResponse;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
@@ -23,7 +20,8 @@ import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 
-import com.contacts.web.model.Contact;
+import com.contacts.web.model.ContactModel;
+import com.contacts.web.service.pagination.ModelListPage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ContactService {
@@ -73,31 +71,31 @@ public class ContactService {
 		return builder.toString();
 	}
 
-	public EntityListPage<Contact> loadContacts(int offset, int limit) throws Exception {
+	public ModelListPage<ContactModel> loadContacts(int offset, int limit) throws Exception {
 		URI uri = (new URIBuilder(apiUrl + CONTACTS_PATH)).setParameter("offset", Integer.toString(offset))
 				.setParameter("limit", Integer.toString(limit)).build();
 		HttpResponse response = requestEntity(uri);
 		String content = readResponseEntity(response);
 		String links = response.getHeaders("Links")[0].getValue();
-		return new EntityListPage<Contact>(content, links, Contact.class);
+		return new ModelListPage<ContactModel>(content, links, ContactModel.class);
 	}
 
-	public Contact loadContactById(int contactId) throws Exception {
+	public ContactModel loadContactById(int contactId) throws Exception {
 		String address = String.format(ENTITY_REQUEST_URL, apiUrl, CONTACTS_PATH, Integer.toString(contactId));
 		URI uri = (new URIBuilder(address)).build();
 		HttpResponse response = requestEntity(uri);
 		String content = readResponseEntity(response);
 		ObjectMapper objectMapper = new ObjectMapper();
-		return objectMapper.readValue(content, Contact.class);
+		return objectMapper.readValue(content, ContactModel.class);
 	}
 
-	public void updateContact(Contact contact) throws Exception {
+	public void updateContact(ContactModel contact) throws Exception {
 		String address = String.format(ENTITY_REQUEST_URL, apiUrl, CONTACTS_PATH, Integer.toString(contact.getId()));
 		URI uri = (new URIBuilder(address)).build();
 		sendContact(contact, new HttpPut(uri));
 	}
 
-	public void createContact(Contact contact) throws Exception {
+	public void createContact(ContactModel contact) throws Exception {
 		String address = String.format(ENTITY_CREATE_URL, apiUrl, CONTACTS_PATH);
 		URI uri = (new URIBuilder(address)).build();
 		sendContact(contact, new HttpPost(uri));
@@ -111,7 +109,7 @@ public class ContactService {
 		this.handleStatusCode(response);
 	}
 
-	private void sendContact(Contact contact, HttpEntityEnclosingRequestBase method) throws Exception {
+	private void sendContact(ContactModel contact, HttpEntityEnclosingRequestBase method) throws Exception {
 		final HttpClient httpClient = HttpClientBuilder.create().build();
 		ObjectMapper objectMapper = new ObjectMapper();
 		String json = objectMapper.writeValueAsString(contact);

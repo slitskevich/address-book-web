@@ -1,7 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@page import="java.util.*"  %>
-<%@page import="com.contacts.web.model.Contact"  %>
+<%@page import="com.contacts.web.model.ContactModel"  %>
 <%@page import="com.contacts.web.service.*"  %>
 <%@page import="com.contacts.web.Constants" %>
 <%@ page errorPage="error.jsp" %> 
@@ -9,16 +9,16 @@
 <html>
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<title><%= "Contacts" %></title>
+<title><%="Contacts"%></title>
 </head>
 <body>
-	<% 	
+	<%
 		String query = request.getQueryString();
-		String reloadPath = request.getServletPath() + (query != null ? query : "");
+			String reloadPath = request.getServletPath() + (query != null ? query : "");
 
-		String errorMessage = request.getParameter(Constants.ERROR_MESSAGE_PARAMETER);
-		if (errorMessage != null) {
-		%><p style="color:red;">Error: <%= errorMessage %></p><%
+			String errorMessage = request.getParameter(Constants.ERROR_MESSAGE_PARAMETER);
+			if (errorMessage != null) {
+	%><p style="color:red;">Error: <%=errorMessage%></p><%
 		}
 		try {
 			ContactService service = new ContactService(getServletContext().getInitParameter(Constants.API_URL_PARAMETER));
@@ -26,11 +26,10 @@
 			int offset = offsetParameter != null ? Integer.parseInt(offsetParameter) : 0;
 			String limitParameter = request.getParameter(Constants.LIMTI_PARAMETER);
 			int limit = limitParameter != null ? Integer.parseInt(limitParameter) : 5;
-			EntityListPage<Contact> contacts = service.loadContacts(offset, limit);			
-			
-			%><header><h1>Contacts</h1></header>   <a href="contact.jsp">Add new Contact</a></a><ol><%
-			for (Contact next : contacts.getPageItems()) {
-	%><li><a href="contact.jsp?contactId=<%= next.getId() %>"><%= next.getLastName() %>, <%= next.getFirstName() %></a></li><%
+			ModelListPage<ContactModel> contacts = service.loadContacts(offset, limit);
+	%><header><h1>Contacts</h1></header>   <a href="contact.jsp">Add new Contact</a></a><ol><%
+   	for (ContactModel next : contacts.getPageItems()) {
+   %><li><a href="contact.jsp?contactId=<%= next.getId() %>"><%= next.getLastName() %>, <%= next.getFirstName() %></a></li><%
 			}%>
 			</ol><br/>
 			<%

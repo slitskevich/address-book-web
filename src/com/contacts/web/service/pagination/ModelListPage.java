@@ -1,4 +1,4 @@
-package com.contacts.web.service;
+package com.contacts.web.service.pagination;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -13,9 +13,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 
-public class EntityListPage <T> {
+public class ModelListPage <T> {
 	
-	private static final Logger LOGGER = Logger.getLogger(EntityListPage.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(ModelListPage.class.getName());
 	
 	private List<T> pageItems;
 	
@@ -29,7 +29,7 @@ public class EntityListPage <T> {
 	private final static String FIRST = "first";
 	private Map<String, PageLink> links = new HashMap<String, PageLink>();
 	
-	public EntityListPage(String pageContent, String linksHeader, Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
+	public ModelListPage(String pageContent, String linksHeader, Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		TypeFactory typeFactory = objectMapper.getTypeFactory();
 		
