@@ -1,4 +1,4 @@
-package com.contacts.web.service.pagination;
+package com.contacts.web.model.pagination;
 
 import java.net.URI;
 import java.util.logging.Logger;

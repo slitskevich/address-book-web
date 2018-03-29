@@ -21,7 +21,7 @@ import org.apache.http.message.BasicHeader;
 import org.apache.http.protocol.HTTP;
 
 import com.contacts.web.model.ContactModel;
-import com.contacts.web.service.pagination.ModelListPage;
+import com.contacts.web.model.pagination.ModelListPage;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class ContactService {
