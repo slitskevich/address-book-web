@@ -13,13 +13,21 @@ import com.contacts.web.service.ApiException;
 import com.contacts.web.service.ContactService;
 
 /**
- * Servlet implementation class CreateContact
+ * Servlet to process create contact requests
  */
 @WebServlet("/CreateContact")
 public class CreateContact extends HttpServlet {
+	
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
 
 	/**
+	 * Calls REST API to create new contact with values passed as parameters to the servlet. If create fails due to recoverable error 
+	 * reloads the request with added error message
+	 *
+	 * @param request the request
+	 * @param response the response
+	 * @throws Exception if API fails to create the contact 
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse
 	 *      response)
 	 */

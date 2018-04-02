@@ -5,6 +5,9 @@ import java.util.logging.Logger;
 
 import com.contacts.web.Constants;
 
+/**
+ * Model list page link
+ */
 public class PageLink {
 	
 	private static final Logger LOGGER = Logger.getLogger(PageLink.class.getName());
@@ -12,10 +15,22 @@ public class PageLink {
 	private final static int DEFAULT_LIMIT = 5;
 	private final static int DEFAULT_OFFSET = 0;
 	
+	/** The page link. */
 	private String link;
+	
+	/** The page offset. */
 	private int offset;
+	
+	/** The page limit. */
 	private int limit;
 	
+	/**
+	 * Instantiates a new page link.
+	 *
+	 * @param link the link
+	 * @param offset the offset
+	 * @param limit the limit
+	 */
 	private PageLink(String link, int offset, int limit) {
 		LOGGER.info("this.offset: " + offset + ", limit: " + limit + ", link: " + link);
 		this.link = link;
@@ -23,6 +38,12 @@ public class PageLink {
 		this.offset = offset;
 	}
 	
+	/**
+	 * Parses the URI by examining its query string
+	 *
+	 * @param uri the uri
+	 * @return the page link
+	 */
 	public static PageLink parse(URI uri) {
 		int offset = DEFAULT_OFFSET;
 		int limit = DEFAULT_LIMIT;
@@ -38,14 +59,29 @@ public class PageLink {
 		return new PageLink(uri.toString(), offset, limit);
 	}
 	
+	/**
+	 * Gets the link.
+	 *
+	 * @return the link
+	 */
 	public String getLink() {
 		return link;
 	}
 	
+	/**
+	 * Gets the offset.
+	 *
+	 * @return the offset
+	 */
 	public int getOffset() {
 		return offset;
 	}
 	
+	/**
+	 * Gets the limit.
+	 *
+	 * @return the limit
+	 */
 	public int getLimit() {
 		return limit;
 	}		

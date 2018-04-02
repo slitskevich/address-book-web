@@ -12,13 +12,21 @@ import com.contacts.web.service.ApiException;
 import com.contacts.web.service.ContactService;
 
 /**
- * Servlet implementation class DeleteContact
+ * Servlet to process delete contact requests
  */
 @WebServlet("/DeleteContact")
 public class DeleteContact extends HttpServlet {
+	
+	/** The Constant serialVersionUID. */
 	private static final long serialVersionUID = 1L;
        
 	/**
+	 * Calls REST API to delete contact defined by ID parameters to the servlet. If delete fails due to recoverable error 
+	 * reloads the request with added error message
+	 *
+	 * @param request the request
+	 * @param response the response
+	 * @throws Exception if API fails to delete the contact 
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
