@@ -14,6 +14,7 @@ import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpPut;
+import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -28,7 +29,7 @@ public class ContactService {
 
 	private static final Logger LOGGER = Logger.getLogger(ContactService.class.getName());
 
-	private static final String CONTACTS_PATH = "contacts";
+	static final String CONTACTS_PATH = "contacts";
 
 	private static final String ENTITY_REQUEST_URL = "%s%s/%s";
 
@@ -45,11 +46,10 @@ public class ContactService {
 		final HttpClient httpClient = HttpClientBuilder.create().build();
 		HttpGet httpGetRequest = new HttpGet(uri);
 		HttpResponse response = httpClient.execute(httpGetRequest);
-		handleStatusCode(response);
 		return response;
 	}
 	
-	private void handleStatusCode(HttpResponse response) throws Exception {
+	void handleStatusCode(HttpResponse response) throws Exception {
 		int statusCode = response.getStatusLine().getStatusCode();
 		if (statusCode >= 400) {
 			ApiStatus status = getResponseStatus(response);
@@ -72,45 +72,63 @@ public class ContactService {
 	}
 
 	public ModelListPage<ContactModel> loadContacts(int offset, int limit) throws Exception {
-		URI uri = (new URIBuilder(apiUrl + CONTACTS_PATH)).setParameter("offset", Integer.toString(offset))
+		return handleLoadContactsResponse(requestEntity(buildLoadContactsUri(offset, limit)));
+	}
+	
+	URI buildLoadContactsUri(int offset, int limit) throws Exception {
+		return (new URIBuilder(apiUrl + CONTACTS_PATH)).setParameter("offset", Integer.toString(offset))
 				.setParameter("limit", Integer.toString(limit)).build();
-		HttpResponse response = requestEntity(uri);
+	}
+	
+	ModelListPage<ContactModel> handleLoadContactsResponse(HttpResponse response) throws Exception {		
+		handleStatusCode(response);
 		String content = readResponseEntity(response);
 		String links = response.getHeaders("Links")[0].getValue();
 		return new ModelListPage<ContactModel>(content, links, ContactModel.class);
 	}
 
-	public ContactModel loadContactById(int contactId) throws Exception {
+	URI buildContactRequestUri(int contactId) throws Exception {
 		String address = String.format(ENTITY_REQUEST_URL, apiUrl, CONTACTS_PATH, Integer.toString(contactId));
-		URI uri = (new URIBuilder(address)).build();
-		HttpResponse response = requestEntity(uri);
+		return (new URIBuilder(address)).build();
+	}
+	
+	ContactModel handleLoadContactResponse(HttpResponse response) throws Exception {
+		handleStatusCode(response);
 		String content = readResponseEntity(response);
 		ObjectMapper objectMapper = new ObjectMapper();
 		return objectMapper.readValue(content, ContactModel.class);
 	}
+	
+	public ContactModel loadContactById(int contactId) throws Exception {		
+		return handleLoadContactResponse(requestEntity(buildContactRequestUri(contactId)));
+	}
 
 	public void updateContact(ContactModel contact) throws Exception {
-		String address = String.format(ENTITY_REQUEST_URL, apiUrl, CONTACTS_PATH, Integer.toString(contact.getId()));
-		URI uri = (new URIBuilder(address)).build();
-		sendContact(contact, new HttpPut(uri));
+		sendContact(contact, new HttpPut(buildContactRequestUri(contact.getId())));
+	}
+	
+	URI buildCreateContactUri() throws Exception {
+		String address = String.format(ENTITY_CREATE_URL, apiUrl, CONTACTS_PATH);
+		return (new URIBuilder(address)).build();
 	}
 
 	public void createContact(ContactModel contact) throws Exception {
-		String address = String.format(ENTITY_CREATE_URL, apiUrl, CONTACTS_PATH);
-		URI uri = (new URIBuilder(address)).build();
-		sendContact(contact, new HttpPost(uri));
+		sendContact(contact, new HttpPost(buildCreateContactUri()));
+	}
+	
+	HttpUriRequest deleteRequest(int contactId) throws Exception {
+		return new HttpDelete(buildContactRequestUri(contactId));
+	}
+	
+	void handleDeleteResponse(HttpResponse response) throws Exception {
+		handleStatusCode(response);
 	}
 
 	public void deleteContact(int contactId) throws Exception {
-		String address = String.format(ENTITY_REQUEST_URL, apiUrl, CONTACTS_PATH, Integer.toString(contactId));
-		URI uri = (new URIBuilder(address)).build();
-		final HttpClient httpClient = HttpClientBuilder.create().build();
-		HttpResponse response = httpClient.execute(new HttpDelete(uri));
-		this.handleStatusCode(response);
+		handleDeleteResponse(HttpClientBuilder.create().build().execute(deleteRequest(contactId)));
 	}
-
-	private void sendContact(ContactModel contact, HttpEntityEnclosingRequestBase method) throws Exception {
-		final HttpClient httpClient = HttpClientBuilder.create().build();
+	
+	void buildSendContactRequest(ContactModel contact, HttpEntityEnclosingRequestBase method) throws Exception {
 		ObjectMapper objectMapper = new ObjectMapper();
 		String json = objectMapper.writeValueAsString(contact);
 		StringEntity entity = new StringEntity(json);
@@ -118,7 +136,11 @@ public class ContactService {
 		method.setHeader("Accept", "application/json");
 		method.setHeader("Content-type", "application/json");
 		method.setEntity(entity);
-		HttpResponse response = httpClient.execute(method);
+	}
+	
+	private void sendContact(ContactModel contact, HttpEntityEnclosingRequestBase method) throws Exception {
+		buildSendContactRequest(contact, method);
+		HttpResponse response = HttpClientBuilder.create().build().execute(method);
 		this.handleStatusCode(response);
 	}
 

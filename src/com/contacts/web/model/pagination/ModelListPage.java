@@ -23,24 +23,25 @@ public class ModelListPage <T> {
 		return pageItems;
 	}
 
-	private final static String PREV = "prev";
-	private final static String NEXT = "next";
-	private final static String LAST = "last";
-	private final static String FIRST = "first";
+	public final static String PREV = "prev";
+	public final static String NEXT = "next";
+	public final static String LAST = "last";
+	public final static String FIRST = "first";
+	
+	public final static String SPLITTER = ",";
+	
 	private Map<String, PageLink> links = new HashMap<String, PageLink>();
 	
 	public ModelListPage(String pageContent, String linksHeader, Class<T> clazz) throws JsonParseException, JsonMappingException, IOException {
 		ObjectMapper objectMapper = new ObjectMapper();
 		TypeFactory typeFactory = objectMapper.getTypeFactory();
 		
-		for (String next : linksHeader.split(",")) {
-			try {
+		if (linksHeader != null && !linksHeader.isEmpty()) {
+			for (String next : linksHeader.split(SPLITTER)) {
 				Link link = Link.valueOf(next);
 				links.put(link.getRel(), PageLink.parse(link.getUri()));
-			} catch (IllegalArgumentException ex) {
-				LOGGER.info("Failed to parse links: " + next);
-			}
-		}	
+			}	
+		}
 		
 		this.pageItems = objectMapper.readValue(pageContent, typeFactory.constructCollectionType(List.class, clazz));
 	}

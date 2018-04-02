@@ -1,7 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@page import="java.util.*"  %>
-<%@page import="com.contacts.web.model.ContactModel"  %>
+<%@page import="com.contacts.web.model.*"  %>
+<%@page import="com.contacts.web.model.pagination.*"  %>
 <%@page import="com.contacts.web.service.*"  %>
 <%@page import="com.contacts.web.Constants" %>
 <%@ page errorPage="error.jsp" %> 
